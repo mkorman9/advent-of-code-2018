@@ -35,5 +35,6 @@ fun main(args: Array<String>) {
         .readLines()
         .map { it.toInt() }
 
-    println(findRepeatedFrequency(changes))
+    println("Subtask #1: ${changes.sum()}")
+    println("Subtask #2: ${findRepeatedFrequency(changes)}")
 }
