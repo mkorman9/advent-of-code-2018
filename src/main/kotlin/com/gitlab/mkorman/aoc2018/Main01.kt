@@ -30,7 +30,8 @@ private fun getSubsequentFrequencies(initialFrequency: Int, changes: List<Int>):
 
 
 fun main(args: Array<String>) {
-    val changes = File("01/input.txt")
+    val source = object {}.javaClass.getResource("/input.txt").file
+    val changes = File(source)
         .readLines()
         .map { it.toInt() }
 
