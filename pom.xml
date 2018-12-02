@@ -10,8 +10,10 @@
     <packaging>jar</packaging>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <kotlin.version>1.2.71</kotlin.version>
-        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+        <kotlin.language.version>1.2</kotlin.language.version>
     </properties>
 
     <dependencies>
@@ -34,24 +36,13 @@
 
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
-                <configuration>
-                    <source>${kotlin.compiler.jvmTarget}</source>
-                    <target>${kotlin.compiler.jvmTarget}</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <version>${kotlin.version}</version>
 
                 <configuration>
-                    <languageVersion>1.2</languageVersion>
-                    <apiVersion>1.2</apiVersion>
+                    <languageVersion>${kotlin.language.version}</languageVersion>
+                    <apiVersion>${kotlin.language.version}</apiVersion>
                     <experimentalCoroutines>enable</experimentalCoroutines>
                 </configuration>
 
@@ -73,5 +64,6 @@
                 </executions>
             </plugin>
         </plugins>
+        
     </build>
 </project>
