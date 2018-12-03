@@ -32,8 +32,8 @@ class Fabric(val width: Int, val height: Int) {
     val grid: Array<FabricSquareInch> = Array(width * height, { _ -> FabricSquareInch() })
 
     fun addClaim(claim: Claim) {
-        for (y in claim.y until (claim.y + claim.height)) {
-            for (x in claim.x until (claim.x + claim.width)) {
+        for (x in claim.x until (claim.x + claim.width)) {
+            for (y in claim.y until (claim.y + claim.height)) {
                 grid[y * width + x].claims.add(claim)
             }
         }
@@ -52,8 +52,8 @@ class Fabric(val width: Int, val height: Int) {
     }
 
     fun isIndependentClaim(claim: Claim): Boolean {
-        for (y in claim.y until (claim.y + claim.height)) {
-            for (x in claim.x until (claim.x + claim.width)) {
+        for (x in claim.x until (claim.x + claim.width)) {
+            for (y in claim.y until (claim.y + claim.height)) {
                 if (grid[y * width + x].claims.size != 1) {
                     return false
                 }
