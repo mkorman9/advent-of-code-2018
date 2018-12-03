@@ -24,17 +24,17 @@ fun parseClaim(claimStr: String): Claim {
     )
 }
 
-data class FabricInch(
+data class FabricSquareInch(
     val claims: MutableSet<Claim> = mutableSetOf()
 )
 
-class Fabric(width: Int, height: Int) {
-    val area: Array<Array<FabricInch>> = Array(height, { _ -> Array(width, { _ -> FabricInch() }) })
+class Fabric(val width: Int, val height: Int) {
+    val grid: Array<FabricSquareInch> = Array(width * height, { _ -> FabricSquareInch() })
 
     fun addClaim(claim: Claim) {
         for (y in claim.y until (claim.y + claim.height)) {
             for (x in claim.x until (claim.x + claim.width)) {
-                area[y][x].claims.add(claim)
+                grid[y * width + x].claims.add(claim)
             }
         }
     }
@@ -42,11 +42,9 @@ class Fabric(width: Int, height: Int) {
     fun getIntersectionArea(): Int {
         var totalArea = 0
 
-        for (row in area) {
-            for (inch in row) {
-                if (inch.claims.size > 1) {
-                    totalArea++
-                }
+        for (squareInch in grid) {
+            if (squareInch.claims.size > 1) {
+                totalArea++
             }
         }
 
@@ -56,7 +54,7 @@ class Fabric(width: Int, height: Int) {
     fun isIndependentClaim(claim: Claim): Boolean {
         for (y in claim.y until (claim.y + claim.height)) {
             for (x in claim.x until (claim.x + claim.width)) {
-                if (area[y][x].claims.size != 1) {
+                if (grid[y * width + x].claims.size != 1) {
                     return false
                 }
             }
