@@ -44,11 +44,7 @@ class Grid(val width: Int, val height: Int) {
     private val fields = Array(width * height) { index -> GridField(indexX(index), indexY(index)) }
 
     fun applyCoordinates(coordinates: Coordinates) {
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                fields[index(x, y)].saveDistanceTo(coordinates)
-            }
-        }
+        fields.forEach { it.saveDistanceTo(coordinates) }
     }
 
     fun getLargestOwnedArea(): Int {
@@ -78,28 +74,13 @@ class Grid(val width: Int, val height: Int) {
         val result = areas.toMutableMap()
 
         for (x in 0 until width) {
-            val owner = fields[index(x, 0)].getOwner()
-            if (result.containsKey(owner)) {
-                result.remove(owner)
-            }
+            result.remove(fields[index(x, 0)].getOwner())
+            result.remove(fields[index(x, height - 1)].getOwner())
         }
+
         for (y in 0 until height) {
-            val owner = fields[index(0, y)].getOwner()
-            if (result.containsKey(owner)) {
-                result.remove(owner)
-            }
-        }
-        for (x in 0 until width) {
-            val owner = fields[index(x, height - 1)].getOwner()
-            if (result.containsKey(owner)) {
-                result.remove(owner)
-            }
-        }
-        for (y in 0 until height) {
-            val owner = fields[index(width - 1, y)].getOwner()
-            if (result.containsKey(owner)) {
-                result.remove(owner)
-            }
+            result.remove(fields[index(0, y)].getOwner())
+            result.remove(fields[index(width - 1, y)].getOwner())
         }
 
         return result.toMap()
