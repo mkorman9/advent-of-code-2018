@@ -32,12 +32,12 @@ class Map(val points: Set<Point>) {
         for (i in 0 .. maxIter) {
             update()
 
-            val span = calculateSpan()
-            if (span > localMinimum) {
+            val currentSpan = span
+            if (currentSpan > localMinimum) {
                 revertUpdate()
                 break
             }
-            localMinimum = span
+            localMinimum = currentSpan
 
             updates++
         }
@@ -75,9 +75,8 @@ class Map(val points: Set<Point>) {
         }
     }
 
-    private fun calculateSpan(): Long {
-        return (boundX + Math.abs(startX)).toLong() * (boundY + Math.abs(startY)).toLong()
-    }
+    private val span: Long
+        get() = (boundX + Math.abs(startX)).toLong() * (boundY + Math.abs(startY)).toLong()
 
     private val startX: Int
         get() = points.minBy { it.x }!!.x
