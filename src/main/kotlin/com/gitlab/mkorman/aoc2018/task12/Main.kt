@@ -17,5 +17,7 @@ fun main(args: Array<String>) {
     val pots = Pots.parseFile(file)
 
     println("Subtask #1: ${countIndexesInGeneration(pots, 20)}")
-    println("Subtask #2: ${countIndexesInGeneration(pots, 50000000000)}")
+
+    // after certain index sum changes by exactly 52 per each generation
+    println("Subtask #2: ${countIndexesInGeneration(pots, 1000) + ((50000000000 - 1000) * 52)}")
 }
