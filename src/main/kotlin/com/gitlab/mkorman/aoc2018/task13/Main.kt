@@ -152,8 +152,7 @@ data class Cart(
 
 data class CartCollision(
     val cart1: Cart,
-    val cart2: Cart,
-    val tick: Int
+    val cart2: Cart
 )
 
 class Map(lines: List<String>) {
@@ -165,10 +164,7 @@ class Map(lines: List<String>) {
         var tickNumber = 0
 
         while (true) {
-            val collisions = tick(
-                n = tickNumber,
-                stopAfterFirstCollision = true
-            )
+            val collisions = tick(n = tickNumber)
 
             if (!collisions.isEmpty()) {
                 return collisions[0]
@@ -186,35 +182,39 @@ class Map(lines: List<String>) {
                 return carts[0]
             }
 
-            val collisions = tick(
-                n = tickNumber,
-                stopAfterFirstCollision = false
-            )
-
-            for (collision in collisions) {
-                carts.remove(collision.cart1)
-                carts.remove(collision.cart2)
-            }
+            tick(tickNumber)
 
             tickNumber++
         }
     }
 
-    private fun tick(n: Int, stopAfterFirstCollision: Boolean): List<CartCollision> {
-        carts.sortBy { it.y * carts.size + it.x }
+    private fun tick(n: Int): List<CartCollision> {
+        carts.sortBy { it.y * area[0].size + it.x }
 
-        for (cart in carts) {
-            cart.move(area[cart.y][cart.x])
+        val allCollisions = mutableListOf<CartCollision>()
 
-            if (stopAfterFirstCollision) {
-                val collisions = checkForCollision(n)
-                if (!collisions.isEmpty()) {
-                    return collisions
+        var i = 0
+        while (i < carts.size) {
+            carts[i].move(area[carts[i].y][carts[i].x])
+
+            val collision = checkCollisionFor(carts[i])
+            if (collision != null) {
+                carts.removeAt(i)
+                i--
+
+                val cart2Index = carts.indexOf(collision.cart2)
+                carts.removeAt(cart2Index)
+                if (cart2Index <= i) {
+                    i--
                 }
+
+                allCollisions.add(collision)
             }
+
+            i++
         }
 
-        return checkForCollision(n)
+        return allCollisions
     }
 
     private fun createTile(input: Char, row: Int, column: Int): MapTile {
@@ -247,20 +247,16 @@ class Map(lines: List<String>) {
         )
     }
 
-    private fun checkForCollision(n: Int): List<CartCollision> {
-        val collisions = mutableListOf<Pair<Cart, Cart>>()
-
-        for (cart1 in carts) {
-            for (cart2 in carts) {
-                if (cart1 != cart2) {
-                    if (cart1.x == cart2.x && cart1.y == cart2.y) {
-                        collisions.add(Pair(cart1, cart2))
-                    }
+    private fun checkCollisionFor(cart: Cart): CartCollision? {
+        for (cart2 in carts) {
+            if (cart !== cart2) {
+                if (cart.x == cart2.x && cart.y == cart2.y) {
+                    return CartCollision(cart, cart2)
                 }
             }
         }
 
-        return collisions.map { CartCollision(it.first, it.second, n) }
+        return null
     }
 }
 
