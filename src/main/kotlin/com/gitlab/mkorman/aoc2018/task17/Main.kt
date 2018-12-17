@@ -57,7 +57,7 @@ class Map(clayPositions: List<ClayPosition>) {
             area[indexY(clay.y)][indexX(clay.x)] = Tile.Clay
         }
 
-        area[indexY(0)][indexX(500)] = Tile.Water
+        area[indexY(0)][indexX(500)] = Tile.WaterFlowing
     }
 
     fun print() {
@@ -67,8 +67,10 @@ class Map(clayPositions: List<ClayPosition>) {
                     print(".")
                 } else if (area[y][x] == Tile.Clay) {
                     print("#")
-                } else if (area[y][x] == Tile.Water) {
+                } else if (area[y][x] == Tile.WaterSource) {
                     print("~")
+                } else if (area[y][x] == Tile.WaterFlowing) {
+                    print("|")
                 }
             }
 
@@ -94,7 +96,7 @@ class Map(clayPositions: List<ClayPosition>) {
 
         for (y in 0 until area.size) {
             for (x in 0 until area[y].size) {
-                if (area[y][x] == Tile.Water) {
+                if (area[y][x] == Tile.WaterSource || area[y][x] == Tile.WaterFlowing) {
                     result++
                 }
             }
@@ -108,7 +110,7 @@ class Map(clayPositions: List<ClayPosition>) {
 
         for (y in 0 until area.size) {
             for (x in 0 until area[y].size) {
-                if (area[y][x] == Tile.Water) {
+                if (area[y][x] == Tile.WaterSource || area[y][x] == Tile.WaterFlowing) {
                     if (waterFlow(x, y)) {
                         updates++
                     }
@@ -122,28 +124,61 @@ class Map(clayPositions: List<ClayPosition>) {
     private fun waterFlow(x: Int, y: Int): Boolean {
         var flow = false
 
-        if (y + 1 < area.size && area[y + 1][x] == Tile.Sand) {
-            area[y + 1][x] = Tile.Water
-            flow = true
-        } else {
-            if (y + 1 < area.size) {
-                if (x - 1 >= 0
-                    && area[y][x - 1] != Tile.Clay
-                    && area[y + 1][x - 1] != Tile.Sand
-                ) {
-                    area[y][x - 1] = Tile.Water
+        if (y + 1 < area.size) {
+            if (area[y + 1][x] == Tile.Clay) {
+                area[y][x] = Tile.WaterSource
+            }
+
+            if (area[y + 1][x] == Tile.Sand) {
+                area[y + 1][x] = Tile.WaterFlowing
+                flow = true
+            } else if (area[y][x] == Tile.WaterSource) {
+                if (x - 1 >= 0 && area[y][x - 1] != Tile.Clay) {
+                    area[y][x - 1] = Tile.WaterSource
                     flow = true
                 }
 
-                if (x + 1 < area[0].size
-                    && area[y][x + 1] == Tile.Sand
-                    && area[y + 1][x + 1] != Tile.Sand
-                ) {
-                    area[y][x + 1] = Tile.Water
+                if (x + 1 < area.size && area[y][x + 1] != Tile.Clay) {
+                    area[y][x + 1] = Tile.WaterSource
+                    flow = true
+                }
+            }
+
+            if (area[y + 1][x] == Tile.WaterSource) {
+                if (x + 1 < area[0].size && area[y][x + 1] == Tile.Clay) {
+                    area[y][x] = Tile.WaterSource
+                }
+                if (x - 1 < area[0].size && area[y][x - 1] == Tile.Clay) {
+                    area[y][x] = Tile.WaterSource
+                }
+            }
+
+            if (x - 1 >= 0 && (area[y + 1][x - 1] == Tile.Clay || area[y + 1][x - 1] == Tile.WaterSource)) {
+                if (area[y + 1][x] == Tile.Clay || area[y + 1][x] == Tile.WaterSource) {
+                    if (x + 1 < area[0].size && (area[y + 1][x + 1] == Tile.Clay || area[y + 1][x + 1] == Tile.WaterSource)) {
+                        area[y][x] = Tile.WaterSource
+                    }
+                }
+            }
+        }
+
+        /*
+        if (y + 1 < area.size && area[y][x] == Tile.WaterFlowing) {
+            if (x - 1 >= 0) {
+                if (area[y + 1][x - 1] != Tile.Sand && area[y][x - 1] != Tile.Clay) {
+                    area[y][x - 1] = Tile.WaterSource
+                    flow = true
+                }
+            }
+
+            if (x + 1 < area[0].size) { // room for right flood
+                if (area[y + 1][x + 1] != Tile.Sand && area[y][x + 1] != Tile.Clay) {
+                    area[y][x + 1] = Tile.WaterSource
                     flow = true
                 }
             }
         }
+        */
 
         return flow
     }
@@ -154,7 +189,8 @@ class Map(clayPositions: List<ClayPosition>) {
     enum class Tile {
         Sand,
         Clay,
-        Water
+        WaterSource,
+        WaterFlowing
     }
 }
 
