@@ -108,6 +108,47 @@ class Map(clayPositions: List<ClayPosition>) {
         return result
     }
 
+    fun countContainedWaterTiles(): Int {
+        var result = 0
+
+        for (y in topFreeSpace until area.size) {
+            for (x in 0 until area[y].size) {
+                if (area[y][x] == Tile.WaterSource) {
+                    var containedLeft = false
+                    var containedRight = false
+
+                    for (i in x downTo 0) {
+                        if (area[y][i] == Tile.Sand || area[y][i] == Tile.WaterFlowing) {
+                            break;
+                        }
+
+                        if (area[y][i] == Tile.Clay) {
+                            containedLeft = true;
+                            break;
+                        }
+                    }
+
+                    for (i in x until area[0].size) {
+                        if (area[y][i] == Tile.Sand || area[y][i] == Tile.WaterFlowing) {
+                            break;
+                        }
+
+                        if (area[y][i] == Tile.Clay) {
+                            containedRight = true;
+                            break;
+                        }
+                    }
+
+                    if (containedLeft && containedRight) {
+                        result++
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+
     private fun update(): Int {
         var updates = 0
 
@@ -217,4 +258,5 @@ fun main(args: Array<String>) {
     map.flowUntilComplete()
 
     println("Subtask #1: ${map.countWaterTiles()}")
+    println("Subtask #2: ${map.countContainedWaterTiles()}")
 }
