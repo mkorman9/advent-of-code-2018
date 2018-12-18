@@ -1,6 +1,4 @@
-/*
 import java.io.File
-import kotlin.coroutines.experimental.buildSequence
 
 fun findRepeatedFrequency(changes: List<Int>): Int {
     val encounteredFrequencies = mutableSetOf<Int>()
@@ -21,7 +19,7 @@ fun findRepeatedFrequency(changes: List<Int>): Int {
 private fun getSubsequentFrequencies(initialFrequency: Int, changes: List<Int>): Sequence<Int> {
     var frequency = initialFrequency
 
-    return buildSequence {
+    return sequence {
         for (change in changes) {
             frequency += change
             yield(frequency)
@@ -39,5 +37,3 @@ fun main(args: Array<String>) {
     println("Subtask #1: ${changes.sum()}")
     println("Subtask #2: ${findRepeatedFrequency(changes)}")
 }
-
-*/
