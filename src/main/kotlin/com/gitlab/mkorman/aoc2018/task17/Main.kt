@@ -40,18 +40,21 @@ class ClayPosition(val x: Int, val y: Int) {
 class Map(clayPositions: List<ClayPosition>) {
     private val area: Array<Array<Tile>>
     private val leftPadding: Int
+    private val topFreeSpace: Int
 
     init {
         val minX = clayPositions.minBy { it.x }!!.x
         val maxX = clayPositions.maxBy { it.x }!!.x + 1
+        val minY = clayPositions.minBy { it.y }!!.y
         val maxY = clayPositions.maxBy { it.y }!!.y + 1
-        val verticalSpan = Math.abs(maxX) - Math.abs(minX)
+        val verticalSpan = Math.abs(maxX) - Math.abs(minX) + 2
 
         area = Array(maxY) { y ->
             Array(verticalSpan) { x -> Tile.Sand }
         }
 
         leftPadding = Math.abs(minX)
+        topFreeSpace = minY
 
         for (clay in clayPositions) {
             area[indexY(clay.y)][indexX(clay.x)] = Tile.Clay
@@ -94,7 +97,7 @@ class Map(clayPositions: List<ClayPosition>) {
     fun countWaterTiles(): Int {
         var result = 0
 
-        for (y in 0 until area.size) {
+        for (y in topFreeSpace until area.size) {
             for (x in 0 until area[y].size) {
                 if (area[y][x] == Tile.WaterSource || area[y][x] == Tile.WaterFlowing) {
                     result++
@@ -102,7 +105,7 @@ class Map(clayPositions: List<ClayPosition>) {
             }
         }
 
-        return result - 1
+        return result
     }
 
     private fun update(): Int {
@@ -194,7 +197,7 @@ class Map(clayPositions: List<ClayPosition>) {
         return false
     }
 
-    private fun indexX(index: Int) = index - leftPadding
+    private fun indexX(index: Int) = index - leftPadding + 1
     private fun indexY(index: Int) = index
 
     enum class Tile(val blocking: Boolean) {

@@ -1,3 +1,4 @@
+/*
 import java.io.File
 import kotlin.coroutines.experimental.buildSequence
 
@@ -38,3 +39,5 @@ fun main(args: Array<String>) {
     println("Subtask #1: ${changes.sum()}")
     println("Subtask #2: ${findRepeatedFrequency(changes)}")
 }
+
+*/
