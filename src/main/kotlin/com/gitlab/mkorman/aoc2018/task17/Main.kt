@@ -45,7 +45,7 @@ class Map(clayPositions: List<ClayPosition>) {
         val minX = clayPositions.minBy { it.x }!!.x
         val maxX = clayPositions.maxBy { it.x }!!.x + 1
         val maxY = clayPositions.maxBy { it.y }!!.y + 1
-        val verticalSpan = Math.abs(maxX) - Math.abs(minX) + 2
+        val verticalSpan = Math.abs(maxX) - Math.abs(minX)
 
         area = Array(maxY) { y ->
             Array(verticalSpan) { x -> Tile.Sand }
@@ -87,7 +87,7 @@ class Map(clayPositions: List<ClayPosition>) {
                 break
             }
 
-            print()
+            //print()
         }
     }
 
@@ -102,7 +102,7 @@ class Map(clayPositions: List<ClayPosition>) {
             }
         }
 
-        return result
+        return result - 1
     }
 
     private fun update(): Int {
@@ -117,85 +117,96 @@ class Map(clayPositions: List<ClayPosition>) {
                 }
             }
         }
-
         return updates
     }
 
     private fun waterFlow(x: Int, y: Int): Boolean {
+        var flow = flowDown(x, y)
+        if (area[y][x] == Tile.WaterFlowing) {
+            flow = fillContainer(x, y) || flow
+        }
+        return flow
+    }
+
+    private fun flowDown(x: Int, y: Int): Boolean {
         var flow = false
 
         if (y + 1 < area.size) {
-            if (area[y + 1][x] == Tile.Clay) {
+            if (area[y][x] == Tile.WaterFlowing && area[y + 1][x] == Tile.Clay) {
                 area[y][x] = Tile.WaterSource
+                flow = true
             }
 
             if (area[y + 1][x] == Tile.Sand) {
                 area[y + 1][x] = Tile.WaterFlowing
                 flow = true
             } else if (area[y][x] == Tile.WaterSource) {
-                if (x - 1 >= 0 && area[y][x - 1] != Tile.Clay) {
-                    area[y][x - 1] = Tile.WaterSource
+                if (x - 1 >= 0 && !area[y][x - 1].blocking && area[y][x - 1] != Tile.WaterFlowing) {
+                    area[y][x - 1] = Tile.WaterFlowing
                     flow = true
                 }
 
-                if (x + 1 < area.size && area[y][x + 1] != Tile.Clay) {
-                    area[y][x + 1] = Tile.WaterSource
-                    flow = true
-                }
-            }
-
-            if (area[y + 1][x] == Tile.WaterSource) {
-                if (x + 1 < area[0].size && area[y][x + 1] == Tile.Clay) {
-                    area[y][x] = Tile.WaterSource
-                }
-                if (x - 1 < area[0].size && area[y][x - 1] == Tile.Clay) {
-                    area[y][x] = Tile.WaterSource
-                }
-            }
-
-            if (x - 1 >= 0 && (area[y + 1][x - 1] == Tile.Clay || area[y + 1][x - 1] == Tile.WaterSource)) {
-                if (area[y + 1][x] == Tile.Clay || area[y + 1][x] == Tile.WaterSource) {
-                    if (x + 1 < area[0].size && (area[y + 1][x + 1] == Tile.Clay || area[y + 1][x + 1] == Tile.WaterSource)) {
-                        area[y][x] = Tile.WaterSource
-                    }
-                }
-            }
-        }
-
-        /*
-        if (y + 1 < area.size && area[y][x] == Tile.WaterFlowing) {
-            if (x - 1 >= 0) {
-                if (area[y + 1][x - 1] != Tile.Sand && area[y][x - 1] != Tile.Clay) {
-                    area[y][x - 1] = Tile.WaterSource
-                    flow = true
-                }
-            }
-
-            if (x + 1 < area[0].size) { // room for right flood
-                if (area[y + 1][x + 1] != Tile.Sand && area[y][x + 1] != Tile.Clay) {
-                    area[y][x + 1] = Tile.WaterSource
+                if (x + 1 < area.size && !area[y][x + 1].blocking && area[y][x + 1] != Tile.WaterFlowing) {
+                    area[y][x + 1] = Tile.WaterFlowing
                     flow = true
                 }
             }
         }
-        */
 
         return flow
     }
 
-    private fun indexX(index: Int) = index - leftPadding + 1
+    private fun fillContainer(x: Int, y: Int): Boolean {
+        var containedLeft = false
+        var containedRight = false
+
+        if (y + 1 >= area.size) {
+            return false
+        }
+
+        for (i in x downTo 0) {
+            if (area[y + 1][i] == Tile.Sand || area[y + 1][i] == Tile.WaterFlowing) {
+                break;
+            }
+
+            if (area[y + 1][i] == Tile.Clay) {
+                containedLeft = true;
+                break;
+            }
+        }
+
+        for (i in x until area[0].size) {
+            if (area[y + 1][i] == Tile.Sand || area[y + 1][i] == Tile.WaterFlowing) {
+                break;
+            }
+
+            if (area[y + 1][i] == Tile.Clay) {
+                containedRight = true;
+                break;
+            }
+        }
+
+        if (containedLeft && containedRight) {
+            area[y][x] = Tile.WaterSource
+            return true
+        }
+
+        return false
+    }
+
+    private fun indexX(index: Int) = index - leftPadding
     private fun indexY(index: Int) = index
 
-    enum class Tile {
-        Sand,
-        Clay,
-        WaterSource,
-        WaterFlowing
+    enum class Tile(val blocking: Boolean) {
+        Sand(false),
+        Clay(true),
+        WaterSource(true),
+        WaterFlowing(false)
     }
 }
 
 fun main(args: Array<String>) {
-    val source = File(object {}.javaClass.getResource("/task17/debug.txt").file);
+    val source = File(object {}.javaClass.getResource("/task17/input.txt").file);
     val clayPositions: List<ClayPosition> = source.readLines()
         .flatMap { ClayPosition.parseRecord(it) }
     val map = Map(clayPositions)
